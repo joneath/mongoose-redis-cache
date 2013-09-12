@@ -10,18 +10,23 @@ mongooseRedisCache = function(mongoose, options, callback) {
   if (options == null) {
     options = {};
   }
+
+  client = options.redisClient;
   host = options.host || "";
   port = options.port || "";
   pass = options.pass || "";
   redisOptions = options.options || {};
-  mongoose.redisClient = client = redis.createClient(port, host, redisOptions);
-  if (pass.length > 0) {
-    client.auth(pass, function(err) {
-      if (callback) {
-        return callback(err);
-      }
-    });
+  if (!client) {
+    client = redis.createClient(port, host, redisOptions);
+    if (pass.length > 0) {
+      client.auth(pass, function(err) {
+        if (callback) {
+          return callback(err);
+        }
+      });
+    }
   }
+  mongoose.redisClient = client;
   mongoose.Query.prototype._execFind = mongoose.Query.prototype.execFind;
   mongoose.Query.prototype.execFind = function(callback) {
     var cb, expires, fields, key, model, query, schemaOptions, self;
