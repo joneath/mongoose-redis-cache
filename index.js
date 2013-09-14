@@ -40,6 +40,9 @@ mongooseRedisCache = function(mongoose, options, callback) {
     if (!(schemaOptions.redisCache && !options.nocache && options.lean)) {
       return mongoose.Query.prototype._execFind.apply(self, arguments);
     }
+    if (_.isNumber(options.lean)) {
+      expires = options.lean;
+    }
     delete options.nocache;
     key = JSON.stringify(query) + JSON.stringify(options) + JSON.stringify(fields);
     cb = function(err, result) {
